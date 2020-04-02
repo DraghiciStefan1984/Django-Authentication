@@ -20,12 +20,29 @@
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
+                  {% if user.is_authenticated %}
                     <li class="nav-item active">
-                        <a class="nav-link" href="{% url 'login' %}">Login<span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                     </li>
+                  {% else %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+                  {% endif %}
                 </ul>
             </div>
         </nav>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-warning alert-dismissable" role="alert">
+              <buton class="close" data-dismiss="alert"><small><sup>x</sup></small></buton>
+              {{message}}
+            </div>
+          {% endfor %}
+        {% endif %}
         {% block content %}
         {% endblock content %}
     </div>
