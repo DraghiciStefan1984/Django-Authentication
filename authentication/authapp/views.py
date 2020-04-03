@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
+from .forms import SignupForm, EditProfileForm
+
 
 # Create your views here.
 def home(request):
@@ -31,15 +33,39 @@ def logout_user(request):
 
 def register_user(request):
     if request.method=='POST':
-        form=UserCreationForm(request.POST)
+        form=SignupForm(request.POST)
         if form.is_valid():
             form.save()
-            username=form.cleaned_data['usernname']
+            username=form.cleaned_data['username']
             password=form.cleaned_data['password1']
             user = authenticate(request, username=username, password=password)
             login(request, user)
             messages.success(request, ('You have been registered!'))
             return redirect('home')
     else:
-        form=UserCreationForm()
+        form=SignupForm()
     return render(request, 'register.html', {'form':form})
+
+
+def edit_profile(request):
+    if request.method=='POST':
+        form=EditProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, ('You have edited you profile info!'))
+            return redirect('home')
+    else:
+        form=EditProfileForm(instance=request.user)
+    return render(request, 'edit_profile.html', {'form':form})
+
+def change_password(request):
+    if request.method=='POST':
+        form=PasswordChangeForm(data=request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            messages.success(request, ('You have changed your password!'))
+            return redirect('home')
+    else:
+        form=PasswordChangeForm(user=request.user)
+    return render(request, 'change_password.html', {'form':form})
